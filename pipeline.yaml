@@ -1,0 +1,163 @@
+# Simple example Azure DevOps release pipeline 
+# In this case for an ASP.NET Core web app build
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- master
+
+variables:
+  buildConfiguration: 'Release'
+  ProjectName: 'BasicWebApp'
+  AppResourceGroup: 'BasicWebAppRG'
+  AzureSub: 'SETUP AND ADD SERVICE CONNECTION NAME HERE'
+  WebAppNameRoot: 'GDBasicWebApp'
+  AzureRegion: 'UK South'
+  AppHostingPlanName: 'BasicWebAppPlan'
+  skipComponentGovernanceDetection: 'true' # Disable internal to Microsoft injected policy
+
+stages:
+- stage: Build
+  jobs:
+  - job: 'BuildAndPublish'
+    displayName: 'Build and Publish'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: DotNetCoreCLI@2
+      displayName: Restore
+      inputs:
+        command: restore
+        projects: '$(ProjectName)/*.csproj'
+    - task: DotNetCoreCLI@2
+      displayName: Build
+      inputs:
+        projects: '$(ProjectName)/*.csproj'
+        arguments: '--configuration $(BuildConfiguration)'
+    - task: CopyFiles@2
+      displayName: 'Copy Files to: $(Pipeline.Workspace)'
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)'
+        Contents: 'ARM/**'
+        TargetFolder: '$(Pipeline.Workspace)'    
+    - task: DotNetCoreCLI@2
+      displayName: Publish
+      inputs:
+        command: publish
+        publishWebProjects: True
+        arguments: '--configuration $(BuildConfiguration) --output $(Pipeline.Workspace)'
+        zipAfterPublish: True
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Pipeline.Workspace)'
+        artifact: 'drop'
+
+- stage: Dev
+  jobs:
+    - deployment: DeployWebsiteToDev
+      displayName: 'Deploy Web App to Dev'
+      pool:
+        vmImage: 'ubuntu-latest'
+      variables:
+        WebAppName: '$(WebAppNameRoot)Dev'
+      environment: Dev
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - task: DownloadPipelineArtifact@1
+                inputs:
+                  buildType: 'current'
+                  artifactName: 'drop'
+                  targetPath: '$(System.ArtifactsDirectory)/drop'
+              - task: AzureResourceGroupDeployment@2
+                inputs:
+                  azureSubscription: '$(AzureSub)'
+                  action: 'Create Or Update Resource Group'
+                  resourceGroupName: '$(AppResourceGroup)'
+                  location: '$(AzureRegion)'
+                  templateLocation: 'Linked artifact'
+                  csmFile: '$(System.ArtifactsDirectory)/drop/ARM/AppService.json'
+                  csmParametersFile: '$(System.ArtifactsDirectory)/drop/ARM/AppService.parameters.json'
+                  overrideParameters: '-hostingPlanName "$(AppHostingPlanName)" -webSiteName $(WebAppName) -skuName "F1" -skuCapacity 1'
+                  deploymentMode: 'Incremental'
+              - task: AzureRmWebAppDeployment@4
+                inputs:
+                  ConnectionType: 'AzureRM'
+                  azureSubscription: '$(AzureSub)'
+                  appType: 'webApp'
+                  WebAppName: '$(WebAppName)'
+                  packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
+
+- stage: QA
+  jobs:
+    - deployment: DeployWebsiteToQA
+      displayName: 'Deploy Web App to QA'
+      pool:
+        vmImage: 'ubuntu-latest'
+      variables:
+        WebAppName: '$(WebAppNameRoot)QA'
+      environment: QA
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - task: DownloadPipelineArtifact@1
+                inputs:
+                  buildType: 'current'
+                  artifactName: 'drop'
+                  targetPath: '$(System.ArtifactsDirectory)/drop'
+              - task: AzureResourceGroupDeployment@2
+                inputs:
+                  azureSubscription: '$(AzureSub)'
+                  action: 'Create Or Update Resource Group'
+                  resourceGroupName: '$(AppResourceGroup)'
+                  location: '$(AzureRegion)'
+                  templateLocation: 'Linked artifact'
+                  csmFile: '$(System.ArtifactsDirectory)/drop/ARM/AppService.json'
+                  csmParametersFile: '$(System.ArtifactsDirectory)/drop/ARM/AppService.parameters.json'
+                  overrideParameters: '-hostingPlanName "$(AppHostingPlanName)" -webSiteName $(WebAppName) -skuName "F1" -skuCapacity 1'
+                  deploymentMode: 'Incremental'
+              - task: AzureRmWebAppDeployment@4
+                inputs:
+                  ConnectionType: 'AzureRM'
+                  azureSubscription: '$(AzureSub)'
+                  appType: 'webApp'
+                  WebAppName: '$(WebAppName)'
+                  packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
+
+- stage: Prod
+  jobs:
+    - deployment: DeployWebsiteToProd
+      displayName: 'Deploy Web App to Prod'
+      pool:
+        vmImage: 'ubuntu-latest'
+      variables:
+        WebAppName: '$(WebAppNameRoot)Prod'
+      environment: Prod
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - task: DownloadPipelineArtifact@1
+                inputs:
+                  buildType: 'current'
+                  artifactName: 'drop'
+                  targetPath: '$(System.ArtifactsDirectory)/drop'
+              - task: AzureResourceGroupDeployment@2
+                inputs:
+                  azureSubscription: '$(AzureSub)'
+                  action: 'Create Or Update Resource Group'
+                  resourceGroupName: '$(AppResourceGroup)'
+                  location: '$(AzureRegion)'
+                  templateLocation: 'Linked artifact'
+                  csmFile: '$(System.ArtifactsDirectory)/drop/ARM/AppService.json'
+                  csmParametersFile: '$(System.ArtifactsDirectory)/drop/ARM/AppService.parameters.json'
+                  overrideParameters: '-hostingPlanName "$(AppHostingPlanName)" -webSiteName $(WebAppName) -skuName "F1" -skuCapacity 1'
+                  deploymentMode: 'Incremental'
+              - task: AzureRmWebAppDeployment@4
+                inputs:
+                  ConnectionType: 'AzureRM'
+                  azureSubscription: '$(AzureSub)'
+                  appType: 'webApp'
+                  WebAppName: '$(WebAppName)'
+                  packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
