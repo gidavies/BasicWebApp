@@ -91,12 +91,12 @@ stages:
                 displayName: 'Check home page accessibility'
                 inputs:
                   url: '$(DeployWebApp.AppServiceApplicationUrl)'
-                  tagoptions: 'wcag2aa'
+                  tagoptions: 'wcag2a'
               - task: AccessibilityChecker@0
                 displayName: 'Check privacy page accessibility'
                 inputs:
                   url: '$(DeployWebApp.AppServiceApplicationUrl)/Home/Privacy'
-                  tagoptions: 'wcag2aa'
+                  tagoptions: 'wcag2a'
 
 - stage: QA
   jobs:
@@ -139,12 +139,12 @@ stages:
                 displayName: 'Check home page accessibility'
                 inputs:
                   url: '$(DeployWebApp.AppServiceApplicationUrl)'
-                  tagoptions: 'wcag2aa'
+                  tagoptions: 'wcag2a'
               - task: AccessibilityChecker@0
                 displayName: 'Check privacy page accessibility'
                 inputs:
                   url: '$(DeployWebApp.AppServiceApplicationUrl)/Home/Privacy'
-                  tagoptions: 'wcag2aa'
+                  tagoptions: 'wcag2a'
 
 - stage: Prod
   jobs:
@@ -187,9 +187,9 @@ stages:
                 displayName: 'Check home page accessibility'
                 inputs:
                   url: '$(DeployWebApp.AppServiceApplicationUrl)'
-                  tagoptions: 'wcag2aa'
+                  tagoptions: 'wcag2a'
               - task: AccessibilityChecker@0
                 displayName: 'Check privacy page accessibility'
                 inputs:
                   url: '$(DeployWebApp.AppServiceApplicationUrl)/Home/Privacy'
-                  tagoptions: 'wcag2aa'
+                  tagoptions: 'wcag2a'
