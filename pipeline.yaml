@@ -13,7 +13,6 @@ variables:
   WebAppNameRoot: 'GDBasicWebApp'
   AzureRegion: 'UK South'
   AppHostingPlanName: 'BasicWebAppPlan'
-  skipComponentGovernanceDetection: 'true' # Disable internal to Microsoft injected policy
 
 stages:
 - stage: Build
@@ -81,12 +80,23 @@ stages:
                   overrideParameters: '-hostingPlanName "$(AppHostingPlanName)" -webSiteName $(WebAppName) -skuName "F1" -skuCapacity 1'
                   deploymentMode: 'Incremental'
               - task: AzureRmWebAppDeployment@4
+                name: DeployWebApp
                 inputs:
                   ConnectionType: 'AzureRM'
                   azureSubscription: '$(AzureSub)'
                   appType: 'webApp'
                   WebAppName: '$(WebAppName)'
                   packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
+              - task: AccessibilityChecker@0
+                displayName: 'Check home page accessibility'
+                inputs:
+                  url: '$(DeployWebApp.AppServiceApplicationUrl)'
+                  tagoptions: 'wcag2aa'
+              - task: AccessibilityChecker@0
+                displayName: 'Check privacy page accessibility'
+                inputs:
+                  url: '$(DeployWebApp.AppServiceApplicationUrl)/Home/Privacy'
+                  tagoptions: 'wcag2aa'
 
 - stage: QA
   jobs:
@@ -118,12 +128,23 @@ stages:
                   overrideParameters: '-hostingPlanName "$(AppHostingPlanName)" -webSiteName $(WebAppName) -skuName "F1" -skuCapacity 1'
                   deploymentMode: 'Incremental'
               - task: AzureRmWebAppDeployment@4
+                name: DeployWebApp
                 inputs:
                   ConnectionType: 'AzureRM'
                   azureSubscription: '$(AzureSub)'
                   appType: 'webApp'
                   WebAppName: '$(WebAppName)'
                   packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
+              - task: AccessibilityChecker@0
+                displayName: 'Check home page accessibility'
+                inputs:
+                  url: '$(DeployWebApp.AppServiceApplicationUrl)'
+                  tagoptions: 'wcag2aa'
+              - task: AccessibilityChecker@0
+                displayName: 'Check privacy page accessibility'
+                inputs:
+                  url: '$(DeployWebApp.AppServiceApplicationUrl)/Home/Privacy'
+                  tagoptions: 'wcag2aa'
 
 - stage: Prod
   jobs:
@@ -155,9 +176,20 @@ stages:
                   overrideParameters: '-hostingPlanName "$(AppHostingPlanName)" -webSiteName $(WebAppName) -skuName "F1" -skuCapacity 1'
                   deploymentMode: 'Incremental'
               - task: AzureRmWebAppDeployment@4
+                name: DeployWebApp
                 inputs:
                   ConnectionType: 'AzureRM'
                   azureSubscription: '$(AzureSub)'
                   appType: 'webApp'
                   WebAppName: '$(WebAppName)'
                   packageForLinux: '$(System.ArtifactsDirectory)/**/*.zip'
+              - task: AccessibilityChecker@0
+                displayName: 'Check home page accessibility'
+                inputs:
+                  url: '$(DeployWebApp.AppServiceApplicationUrl)'
+                  tagoptions: 'wcag2aa'
+              - task: AccessibilityChecker@0
+                displayName: 'Check privacy page accessibility'
+                inputs:
+                  url: '$(DeployWebApp.AppServiceApplicationUrl)/Home/Privacy'
+                  tagoptions: 'wcag2aa'
