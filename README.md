@@ -18,7 +18,7 @@ az group create --name mynewresourcegroup-rg --location uksouth
 ```
 ### Create a new Azure DevOps Project
 
-Ensure that the source control type is git.
+Ensure that the version control type is git.
 
 ### Add a service connection
 
@@ -32,11 +32,11 @@ In the Azure DevOps project:
 
 ### Import this git repo into the project
 
-In Azure DevOps, select repos and then import a repo. Enter this repo url [https://github.com/gidavies/BasicWebApp.git](https://github.com/gidavies/BasicWebApp.git).
+In Azure DevOps, select repos and then import a repo. Enter the url for this repo [https://github.com/gidavies/BasicWebApp.git](https://github.com/gidavies/BasicWebApp.git).
 
 ### Configure the pipelines.yaml file
 
-In Azure DevOps, select pipelines and add an existing piepline.yaml file from the project (i.e. choose the Azure Repos option). Edit the variables at the top of the yaml file to set:
+In Azure DevOps, select pipelines and add the existing pipeline.yaml file from the imported project (i.e. choose the Azure Repos option). Edit the variables at the top of the yaml file to set:
 
 - Change AppResourceGroup: 'BasicWebAppRG' to the resource group you created above.
 - Edit AzureSub: 'SERVICECONNECTIONNAME' to use the name of the service connection you created above. 
