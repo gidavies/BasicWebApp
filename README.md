@@ -11,22 +11,22 @@ This repo includes a simple .NET Core Web App together with a pipeline definitio
 
 ### Create an Azure resource group
 
-Create a new resource group via the Azure Portal or Azure CLI
+Create a new resource group via the Azure Portal or Azure CLI:
 
 ```cmd
 az group create --name mynewresourcegroup-rg --location uksouth
 ```
 ### Create a new Azure DevOps Project
 
-Ensure that the source control type is Git
+Ensure that the source control type is git.
 
 ### Add a service connection
 
 In the Azure DevOps project:
 - Select the project settings cog in the bottom left corner. 
-- Add a new service connection
+- Add a new service connection.
 - Select the Azure Resource Manager option.
-- Select Service principal (automatic)
+- Select Service principal (automatic).
 - Select the subscription and resource group you created above.
 - Give the service connection a name and remember/copy the name.
 
