@@ -1,5 +1,8 @@
 # Simple example Azure DevOps release pipeline 
-# In this case for an ASP.NET Core web app build
+# In this case for an ASP.NET Core web app
+# Four stages: build, dev, test, prod 
+# Uses ARM to provision each environment then deploy the web app 
+# Accessibility checking task also run against the app
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
@@ -9,8 +12,12 @@ variables:
   buildConfiguration: 'Release'
   ProjectName: 'BasicWebApp'
   AppResourceGroup: 'BasicWebAppRG'
-  AzureSub: 'SETUP AND ADD SERVICE CONNECTION NAME HERE'
-  WebAppNameRoot: 'GDBasicWebApp'
+  # For the service connection, create an Azure resource group in the portal or CLI, 
+  # then in Azure DevOps create a service connection using Azure Resource Manager for that resource group
+  # Add the name you gave the service connection here as the value for AzureSub
+  AzureSub: 'SERVICECONNECTIONNAME' 
+  # WebAppNameRoot will need to be unique so change to add your initials, random numbers etc.
+  WebAppNameRoot: 'BasicWebApp'
   AzureRegion: 'UK South'
   AppHostingPlanName: 'BasicWebAppPlan'
 
